@@ -19,7 +19,7 @@
 This project is licensed under the terms of the MIT open source license.
 Please refer to [MIT](./LICENSE.md) for the full terms.
 
-To use this project for Infrastructure as Code, you will need to [use CodeQL][codeql] and follow all terms and conditions of the [CodeQL License][codeql-license].
+To use this project you will need to [use CodeQL][codeql] and follow all terms and conditions of the [CodeQL License][codeql-license].
 
 For use in private repositories and code, you will need to [purchase a GitHub Advanced Security license][advanced-security].
 
