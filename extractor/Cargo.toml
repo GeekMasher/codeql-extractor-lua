@@ -1,0 +1,23 @@
+[package]
+name = "codeql-extractor-lua"
+description = "A CodeQL extractor for Lua"
+version = "0.1.0"
+edition = "2024"
+authors = ["GeekMasher"]
+
+[dependencies]
+# Standard dependencies
+flate2 = "1.0"
+clap = { version = "4.4", features = ["derive"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+rayon = "1.8"
+regex = "1.11"
+
+# Tree-Sitter
+tree-sitter-lua = { git  = "https://github.com/geekmasher/tree-sitter-lua", branch = "main" }
+# tree-sitter-lua = { path = "./tree-sitter-lua" }
+tree-sitter = "^0.25"
+
+# CodeQL - v2.20.4
+codeql-extractor = { git = "https://github.com/github/codeql", rev = "c524a98eb91c769cb2994b8373181c2ebd27c20f" }

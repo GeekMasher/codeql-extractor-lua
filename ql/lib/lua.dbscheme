@@ -1,0 +1,568 @@
+// CodeQL database schema for LUA
+// Automatically generated from the tree-sitter grammar; do not edit
+
+/*- Files and folders -*/
+
+/**
+ * The location of an element.
+ * The location spans column `startcolumn` of line `startline` to
+ * column `endcolumn` of line `endline` in file `file`.
+ * For more information, see
+ * [Locations](https://codeql.github.com/docs/writing-codeql-queries/providing-locations-in-codeql-queries/).
+ */
+locations_default(
+  unique int id: @location_default,
+  int file: @file ref,
+  int beginLine: int ref,
+  int beginColumn: int ref,
+  int endLine: int ref,
+  int endColumn: int ref
+);
+
+files(
+  unique int id: @file,
+  string name: string ref
+);
+
+folders(
+  unique int id: @folder,
+  string name: string ref
+);
+
+@container = @file | @folder
+
+containerparent(
+  int parent: @container ref,
+  unique int child: @container ref
+);
+
+/*- Empty location -*/
+
+empty_location(
+  int location: @location_default ref
+);
+
+/*- Source location prefix -*/
+
+/**
+ * The source location of the snapshot.
+ */
+sourceLocationPrefix(string prefix : string ref);
+
+/*- Diagnostic messages -*/
+
+diagnostics(
+  unique int id: @diagnostic,
+  int severity: int ref,
+  string error_tag: string ref,
+  string error_message: string ref,
+  string full_error_message: string ref,
+  int location: @location_default ref
+);
+
+/*- Diagnostic messages: severity -*/
+
+case @diagnostic.severity of
+  10 = @diagnostic_debug
+| 20 = @diagnostic_info
+| 30 = @diagnostic_warning
+| 40 = @diagnostic_error
+;
+
+/*- YAML -*/
+
+#keyset[parent, idx]
+yaml (unique int id: @yaml_node,
+      int kind: int ref,
+      int parent: @yaml_node_parent ref,
+      int idx: int ref,
+      string tag: string ref,
+      string tostring: string ref);
+
+case @yaml_node.kind of
+  0 = @yaml_scalar_node
+| 1 = @yaml_mapping_node
+| 2 = @yaml_sequence_node
+| 3 = @yaml_alias_node
+;
+
+@yaml_collection_node = @yaml_mapping_node | @yaml_sequence_node;
+
+@yaml_node_parent = @yaml_collection_node | @file;
+
+yaml_anchors (unique int node: @yaml_node ref,
+              string anchor: string ref);
+
+yaml_aliases (unique int alias: @yaml_alias_node ref,
+              string target: string ref);
+
+yaml_scalars (unique int scalar: @yaml_scalar_node ref,
+              int style: int ref,
+              string value: string ref);
+
+yaml_errors (unique int id: @yaml_error,
+             string message: string ref);
+
+yaml_locations(unique int locatable: @yaml_locatable ref,
+             int location: @location_default ref);
+
+@yaml_locatable = @yaml_node | @yaml_error;
+
+/*- LUA dbscheme -*/
+#keyset[lua_arguments, index]
+lua_arguments_child(
+  int lua_arguments: @lua_arguments ref,
+  int index: int ref,
+  unique int child: @lua_expression ref
+);
+
+lua_arguments_def(
+  unique int id: @lua_arguments
+);
+
+@lua_assignment_statement_child_type = @lua_expression_list | @lua_variable_list
+
+#keyset[lua_assignment_statement, index]
+lua_assignment_statement_child(
+  int lua_assignment_statement: @lua_assignment_statement ref,
+  int index: int ref,
+  unique int child: @lua_assignment_statement_child_type ref
+);
+
+lua_assignment_statement_def(
+  unique int id: @lua_assignment_statement
+);
+
+lua_attribute_def(
+  unique int id: @lua_attribute,
+  int child: @lua_token_identifier ref
+);
+
+case @lua_binary_expression.operator of
+  0 = @lua_binary_expression_percent
+| 1 = @lua_binary_expression_ampersand
+| 2 = @lua_binary_expression_star
+| 3 = @lua_binary_expression_plus
+| 4 = @lua_binary_expression_minus
+| 5 = @lua_binary_expression_dotdot
+| 6 = @lua_binary_expression_slash
+| 7 = @lua_binary_expression_slashslash
+| 8 = @lua_binary_expression_langle
+| 9 = @lua_binary_expression_langlelangle
+| 10 = @lua_binary_expression_langleequal
+| 11 = @lua_binary_expression_equalequal
+| 12 = @lua_binary_expression_rangle
+| 13 = @lua_binary_expression_rangleequal
+| 14 = @lua_binary_expression_ranglerangle
+| 15 = @lua_binary_expression_caret
+| 16 = @lua_binary_expression_and
+| 17 = @lua_binary_expression_or
+| 18 = @lua_binary_expression_pipe
+| 19 = @lua_binary_expression_tilde
+| 20 = @lua_binary_expression_tildeequal
+;
+
+
+lua_binary_expression_def(
+  unique int id: @lua_binary_expression,
+  int left: @lua_expression ref,
+  int operator: int ref,
+  int right: @lua_expression ref
+);
+
+@lua_block_child_type = @lua_return_statement | @lua_statement
+
+#keyset[lua_block, index]
+lua_block_child(
+  int lua_block: @lua_block ref,
+  int index: int ref,
+  unique int child: @lua_block_child_type ref
+);
+
+lua_block_def(
+  unique int id: @lua_block
+);
+
+@lua_bracket_index_expression_table_type = @lua_function_call | @lua_parenthesized_expression | @lua_variable
+
+lua_bracket_index_expression_def(
+  unique int id: @lua_bracket_index_expression,
+  int field: @lua_expression ref,
+  int table: @lua_bracket_index_expression_table_type ref
+);
+
+@lua_chunk_child_type = @lua_return_statement | @lua_statement | @lua_token_hash_bang_line
+
+#keyset[lua_chunk, index]
+lua_chunk_child(
+  int lua_chunk: @lua_chunk ref,
+  int index: int ref,
+  unique int child: @lua_chunk_child_type ref
+);
+
+lua_chunk_def(
+  unique int id: @lua_chunk
+);
+
+lua_comment_end(
+  unique int lua_comment: @lua_comment ref,
+  unique int end: @lua_reserved_word ref
+);
+
+case @lua_comment.start of
+  0 = @lua_comment_minusminus
+| 1 = @lua_comment_lbracketlbracket
+;
+
+
+lua_comment_def(
+  unique int id: @lua_comment,
+  int content: @lua_token_comment_content ref,
+  int start: int ref
+);
+
+@lua_declaration = @lua_function_declaration | @lua_variable_declaration
+
+lua_do_statement_body(
+  unique int lua_do_statement: @lua_do_statement ref,
+  unique int body: @lua_block ref
+);
+
+lua_do_statement_def(
+  unique int id: @lua_do_statement
+);
+
+@lua_dot_index_expression_table_type = @lua_function_call | @lua_parenthesized_expression | @lua_variable
+
+lua_dot_index_expression_def(
+  unique int id: @lua_dot_index_expression,
+  int field: @lua_token_identifier ref,
+  int table: @lua_dot_index_expression_table_type ref
+);
+
+lua_else_statement_body(
+  unique int lua_else_statement: @lua_else_statement ref,
+  unique int body: @lua_block ref
+);
+
+lua_else_statement_def(
+  unique int id: @lua_else_statement
+);
+
+lua_elseif_statement_consequence(
+  unique int lua_elseif_statement: @lua_elseif_statement ref,
+  unique int consequence: @lua_block ref
+);
+
+lua_elseif_statement_def(
+  unique int id: @lua_elseif_statement,
+  int condition: @lua_expression ref
+);
+
+@lua_expression = @lua_binary_expression | @lua_function_call | @lua_function_definition | @lua_parenthesized_expression | @lua_string__ | @lua_table_constructor | @lua_token_false | @lua_token_nil | @lua_token_number | @lua_token_true | @lua_token_vararg_expression | @lua_unary_expression | @lua_variable
+
+#keyset[lua_expression_list, index]
+lua_expression_list_value(
+  int lua_expression_list: @lua_expression_list ref,
+  int index: int ref,
+  unique int value: @lua_expression ref
+);
+
+#keyset[lua_expression_list, index]
+lua_expression_list_child(
+  int lua_expression_list: @lua_expression_list ref,
+  int index: int ref,
+  unique int child: @lua_expression ref
+);
+
+lua_expression_list_def(
+  unique int id: @lua_expression_list
+);
+
+@lua_field_name_type = @lua_expression | @lua_token_identifier
+
+lua_field_name(
+  unique int lua_field: @lua_field ref,
+  unique int name: @lua_field_name_type ref
+);
+
+lua_field_def(
+  unique int id: @lua_field,
+  int value: @lua_expression ref
+);
+
+@lua_for_generic_clause_child_type = @lua_expression_list | @lua_variable_list
+
+#keyset[lua_for_generic_clause, index]
+lua_for_generic_clause_child(
+  int lua_for_generic_clause: @lua_for_generic_clause ref,
+  int index: int ref,
+  unique int child: @lua_for_generic_clause_child_type ref
+);
+
+lua_for_generic_clause_def(
+  unique int id: @lua_for_generic_clause
+);
+
+lua_for_numeric_clause_step(
+  unique int lua_for_numeric_clause: @lua_for_numeric_clause ref,
+  unique int step: @lua_expression ref
+);
+
+lua_for_numeric_clause_def(
+  unique int id: @lua_for_numeric_clause,
+  int end: @lua_expression ref,
+  int name: @lua_token_identifier ref,
+  int start: @lua_expression ref
+);
+
+lua_for_statement_body(
+  unique int lua_for_statement: @lua_for_statement ref,
+  unique int body: @lua_block ref
+);
+
+@lua_for_statement_clause_type = @lua_for_generic_clause | @lua_for_numeric_clause
+
+lua_for_statement_def(
+  unique int id: @lua_for_statement,
+  int clause: @lua_for_statement_clause_type ref
+);
+
+@lua_function_call_name_type = @lua_function_call | @lua_method_index_expression | @lua_parenthesized_expression | @lua_variable
+
+lua_function_call_def(
+  unique int id: @lua_function_call,
+  int arguments: @lua_arguments ref,
+  int name: @lua_function_call_name_type ref
+);
+
+lua_function_declaration_body(
+  unique int lua_function_declaration: @lua_function_declaration ref,
+  unique int body: @lua_block ref
+);
+
+@lua_function_declaration_name_type = @lua_dot_index_expression | @lua_method_index_expression | @lua_token_identifier
+
+lua_function_declaration_def(
+  unique int id: @lua_function_declaration,
+  int name: @lua_function_declaration_name_type ref,
+  int parameters: @lua_parameters ref
+);
+
+lua_function_definition_body(
+  unique int lua_function_definition: @lua_function_definition ref,
+  unique int body: @lua_block ref
+);
+
+lua_function_definition_def(
+  unique int id: @lua_function_definition,
+  int parameters: @lua_parameters ref
+);
+
+lua_goto_statement_def(
+  unique int id: @lua_goto_statement,
+  int child: @lua_token_identifier ref
+);
+
+@lua_if_statement_alternative_type = @lua_else_statement | @lua_elseif_statement
+
+#keyset[lua_if_statement, index]
+lua_if_statement_alternative(
+  int lua_if_statement: @lua_if_statement ref,
+  int index: int ref,
+  unique int alternative: @lua_if_statement_alternative_type ref
+);
+
+lua_if_statement_consequence(
+  unique int lua_if_statement: @lua_if_statement ref,
+  unique int consequence: @lua_block ref
+);
+
+lua_if_statement_def(
+  unique int id: @lua_if_statement,
+  int condition: @lua_expression ref
+);
+
+lua_label_statement_def(
+  unique int id: @lua_label_statement,
+  int child: @lua_token_identifier ref
+);
+
+@lua_method_index_expression_table_type = @lua_function_call | @lua_parenthesized_expression | @lua_variable
+
+lua_method_index_expression_def(
+  unique int id: @lua_method_index_expression,
+  int method: @lua_token_identifier ref,
+  int table: @lua_method_index_expression_table_type ref
+);
+
+#keyset[lua_parameters, index]
+lua_parameters_name(
+  int lua_parameters: @lua_parameters ref,
+  int index: int ref,
+  unique int name: @lua_token_identifier ref
+);
+
+lua_parameters_child(
+  unique int lua_parameters: @lua_parameters ref,
+  unique int child: @lua_token_vararg_expression ref
+);
+
+lua_parameters_def(
+  unique int id: @lua_parameters
+);
+
+lua_parenthesized_expression_def(
+  unique int id: @lua_parenthesized_expression,
+  int child: @lua_expression ref
+);
+
+lua_repeat_statement_body(
+  unique int lua_repeat_statement: @lua_repeat_statement ref,
+  unique int body: @lua_block ref
+);
+
+lua_repeat_statement_def(
+  unique int id: @lua_repeat_statement,
+  int condition: @lua_expression ref
+);
+
+lua_return_statement_child(
+  unique int lua_return_statement: @lua_return_statement ref,
+  unique int child: @lua_expression_list ref
+);
+
+lua_return_statement_def(
+  unique int id: @lua_return_statement
+);
+
+@lua_statement = @lua_assignment_statement | @lua_declaration | @lua_do_statement | @lua_for_statement | @lua_function_call | @lua_goto_statement | @lua_if_statement | @lua_label_statement | @lua_repeat_statement | @lua_token_break_statement | @lua_token_empty_statement | @lua_while_statement
+
+lua_string_content(
+  unique int lua_string__: @lua_string__ ref,
+  unique int content: @lua_string_content ref
+);
+
+lua_string_end(
+  unique int lua_string__: @lua_string__ ref,
+  unique int end: @lua_reserved_word ref
+);
+
+lua_string_start(
+  unique int lua_string__: @lua_string__ ref,
+  unique int start: @lua_reserved_word ref
+);
+
+lua_string_def(
+  unique int id: @lua_string__
+);
+
+#keyset[lua_string_content, index]
+lua_string_content_child(
+  int lua_string_content: @lua_string_content ref,
+  int index: int ref,
+  unique int child: @lua_token_escape_sequence ref
+);
+
+lua_string_content_def(
+  unique int id: @lua_string_content
+);
+
+#keyset[lua_table_constructor, index]
+lua_table_constructor_child(
+  int lua_table_constructor: @lua_table_constructor ref,
+  int index: int ref,
+  unique int child: @lua_field ref
+);
+
+lua_table_constructor_def(
+  unique int id: @lua_table_constructor
+);
+
+case @lua_unary_expression.operator of
+  0 = @lua_unary_expression_hash
+| 1 = @lua_unary_expression_minus
+| 2 = @lua_unary_expression_not
+| 3 = @lua_unary_expression_tilde
+;
+
+
+lua_unary_expression_def(
+  unique int id: @lua_unary_expression,
+  int operand: @lua_expression ref,
+  int operator: int ref
+);
+
+@lua_variable = @lua_bracket_index_expression | @lua_dot_index_expression | @lua_token_identifier
+
+@lua_variable_declaration_child_type = @lua_assignment_statement | @lua_variable_list
+
+lua_variable_declaration_def(
+  unique int id: @lua_variable_declaration,
+  int child: @lua_variable_declaration_child_type ref
+);
+
+#keyset[lua_variable_list, index]
+lua_variable_list_attribute(
+  int lua_variable_list: @lua_variable_list ref,
+  int index: int ref,
+  unique int attribute: @lua_attribute ref
+);
+
+#keyset[lua_variable_list, index]
+lua_variable_list_name(
+  int lua_variable_list: @lua_variable_list ref,
+  int index: int ref,
+  unique int name: @lua_variable ref
+);
+
+lua_variable_list_def(
+  unique int id: @lua_variable_list
+);
+
+lua_while_statement_body(
+  unique int lua_while_statement: @lua_while_statement ref,
+  unique int body: @lua_block ref
+);
+
+lua_while_statement_def(
+  unique int id: @lua_while_statement,
+  int condition: @lua_expression ref
+);
+
+lua_tokeninfo(
+  unique int id: @lua_token,
+  int kind: int ref,
+  string value: string ref
+);
+
+case @lua_token.kind of
+  0 = @lua_reserved_word
+| 1 = @lua_token_break_statement
+| 2 = @lua_token_comment_content
+| 3 = @lua_token_empty_statement
+| 4 = @lua_token_escape_sequence
+| 5 = @lua_token_false
+| 6 = @lua_token_hash_bang_line
+| 7 = @lua_token_identifier
+| 8 = @lua_token_nil
+| 9 = @lua_token_number
+| 10 = @lua_token_true
+| 11 = @lua_token_vararg_expression
+;
+
+
+@lua_ast_node = @lua_arguments | @lua_assignment_statement | @lua_attribute | @lua_binary_expression | @lua_block | @lua_bracket_index_expression | @lua_chunk | @lua_comment | @lua_do_statement | @lua_dot_index_expression | @lua_else_statement | @lua_elseif_statement | @lua_expression_list | @lua_field | @lua_for_generic_clause | @lua_for_numeric_clause | @lua_for_statement | @lua_function_call | @lua_function_declaration | @lua_function_definition | @lua_goto_statement | @lua_if_statement | @lua_label_statement | @lua_method_index_expression | @lua_parameters | @lua_parenthesized_expression | @lua_repeat_statement | @lua_return_statement | @lua_string__ | @lua_string_content | @lua_table_constructor | @lua_token | @lua_unary_expression | @lua_variable_declaration | @lua_variable_list | @lua_while_statement
+
+lua_ast_node_location(
+  unique int node: @lua_ast_node ref,
+  int loc: @location_default ref
+);
+
+#keyset[parent, parent_index]
+lua_ast_node_parent(
+  unique int node: @lua_ast_node ref,
+  int parent: @lua_ast_node ref,
+  int parent_index: int ref
+);
+
