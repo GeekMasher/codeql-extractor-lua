@@ -12,7 +12,9 @@
 </div>
 <!-- markdownlint-restore -->
 
-[CodeQL][codeql] Extractor, Library, and Queries for Lua configuations.
+[CodeQL][codeql] Extractor, Library, and Queries for the [Lua programming language](https://www.lua.org/).
+
+[This Project is being developed as part of a blog series on geekmasher.dev](https://geekmasher.dev/series/building-a-codeql-language-support-from-scratch/).
 
 ## License
 
